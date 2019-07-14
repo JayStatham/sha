@@ -178,8 +178,9 @@ bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash)
 		// filling buffer size in bits to 64bits Big-Endian value
 		msg_bit_size = rd * 8;
 		*((uint64_t*)(sha256_buffer + _sha256_filling_size(rd) + rd)) = _sha256_msg_size_be(msg_bit_size);
-		
-		for (size_t s = 0; s < rd + _sha256_padding_size(rd); s += CHUNK_SIZE)
+		size_t	msg_size = rd + _sha256_padding_size(rd);
+
+		for (size_t s = 0; s < msg_size; s += CHUNK_SIZE)
 		{
 			process_chunk(hash, &sha256_buffer[s]);
 		}
