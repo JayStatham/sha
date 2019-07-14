@@ -122,29 +122,40 @@ static void process_chunk(struct sha256_hash *sh, void* chunk)
 
 bool sha256_checksum(void* buf, size_t size, struct sha256_hash* hash)
 {
+	char	*pbuf = (char*)buf;
 	size_t	msg_bit_size = size * 8;
-	size_t	sha256_buffer_size = size + _sha256_padding_size(size);
-	char*	pbuf = (char*)malloc(sha256_buffer_size);
+	size_t	size_tobe_readed = size;
+	size_t	msg_size = 512;
+	char	buffer[_sha256_file_chunk_size(512)] = {0};
 
-	if (pbuf == NULL)
-	{
-		return false;
-	}
-	// make chunk buffer
-	memcpy(pbuf, buf, size);
-	// filling 1bit, 0s...
-	pbuf[size] = 0x80;
-	memset(pbuf + 1 + size, 0, _sha256_filling_size(size) - 1);
-	// filling buffer size in bits to 64bits Big-Endian value
-	*((uint64_t*)(pbuf + _sha256_filling_size(size) + size)) = _sha256_msg_size_be(msg_bit_size);
 	init_sha256_hash(hash);
 	
-	for (size_t s = 0; s < sha256_buffer_size; s += CHUNK_SIZE)
+	while (size_tobe_readed > 0)
 	{
-		process_chunk(hash, &pbuf[s]);
-	}
+		//slice the input buffer to 512B's msg
+		size_t rd = size_tobe_readed > msg_size ? msg_size : size_tobe_readed;
+		memcpy(buffer, pbuf, rd);
+		size_tobe_readed -= rd;
+		pbuf += rd;
+		//is last msg?
+		if (rd < msg_size)
+		{
+			// filling 1bit, 0s...
+			buffer[rd] = 0x80;
+			memset(&buffer[1 + rd], 0, _sha256_filling_size(rd) - 1);
+			// filling buffer size in bits to 64bits Big-Endian value
+			*((uint64_t*)(buffer + _sha256_filling_size(rd) + rd)) = 
+				_sha256_msg_size_be(msg_bit_size);
+			//corrected last msg size
+			msg_size = rd + _sha256_padding_size(rd);
+		}
 
-	free(pbuf);
+		for (size_t s = 0; s < msg_size; s += CHUNK_SIZE)
+		{
+			process_chunk(hash, &buffer[s]);
+		}
+	}
+	
 	return true;
 }
 
@@ -155,7 +166,7 @@ bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash)
 	size_t	msg_bit_size = 0;
 	size_t	msg_size = 512;
 	size_t	file_size = 0;
-	char	sha256_buffer[_sha256_file_chunk_size(512)] = { 0 };
+	char	buffer[_sha256_file_chunk_size(512)] = { 0 };
 
 	fp = fopen(filepath, "r");
 
@@ -168,7 +179,7 @@ bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash)
 
 	while (true)
 	{
-		rd = fread(sha256_buffer, 1, msg_size, fp);
+		rd = fread(buffer, 1, msg_size, fp);
 
 		if (rd < 1)
 		{
@@ -180,17 +191,19 @@ bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash)
 		if (rd < msg_size)
 		{
 			// filling 1bits, 0s...
-			sha256_buffer[rd] = 0x80;
-			memset(sha256_buffer + 1 + rd, 0, _sha256_filling_size(rd) - 1);
+			buffer[rd] = 0x80;
+			memset(&buffer[1 + rd], 0, _sha256_filling_size(rd) - 1);
 			// filling buffer size in bits to 64bits Big-Endian value
 			msg_bit_size = file_size * 8;
-			*((uint64_t*)(sha256_buffer + _sha256_filling_size(rd) + rd)) = _sha256_msg_size_be(msg_bit_size);
+			*((uint64_t*)(buffer + _sha256_filling_size(rd) + rd)) = 
+				_sha256_msg_size_be(msg_bit_size);
+			//corrected last msg size
 			msg_size = rd + _sha256_padding_size(rd);
 		}
 
 		for (size_t s = 0; s < msg_size; s += CHUNK_SIZE)
 		{
-			process_chunk(hash, &sha256_buffer[s]);
+			process_chunk(hash, &buffer[s]);
 		}
 	}
 
