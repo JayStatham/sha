@@ -31,7 +31,7 @@ std::ostream& operator << (std::ostream& out, struct sha256_hash & hash)
 {
 	char    buf[128] = { 0 };
 	bool flag = (out.flags() & std::ios::uppercase) > 0;
-	sha256_hash_to_hexstr(&hash, buf, 128, flag);
+	sha256_hash_to_hexstr(&hash, buf, 128, "hex");
 	out << buf;
 	return out;
 }

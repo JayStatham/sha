@@ -24,8 +24,10 @@ Date: 2019/7/14
 #include <string.h>
 #include <stdlib.h>
 //macros
-#define	CHUNK_SIZE		(64)
-#define	PADDING_MOD		(56)
+#define	CHUNK_SIZE			(64)
+#define	PADDING_MOD			(56)
+//using to sha-calc, to replaced heap way(malloc)
+#define	STACK_BUFFER_SIZE	(512)
 //padding size: [1, 64] bytes
 #define	_sha256_filling_size(x)	(((x) % CHUNK_SIZE) < PADDING_MOD ? \
 		(PADDING_MOD - ((x) % CHUNK_SIZE)): CHUNK_SIZE)
@@ -125,8 +127,8 @@ bool sha256_checksum(void* buf, size_t size, struct sha256_hash* hash)
 	char	*pbuf = (char*)buf;
 	size_t	msg_bit_size = size * 8;
 	size_t	size_tobe_readed = size;
-	size_t	msg_size = 512;
-	char	buffer[_sha256_file_chunk_size(512)] = {0};
+	size_t	msg_size = STACK_BUFFER_SIZE;
+	char	buffer[_sha256_file_chunk_size(STACK_BUFFER_SIZE)] = {0};
 
 	init_sha256_hash(hash);
 	
@@ -164,9 +166,9 @@ bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash)
 	FILE	*fp = NULL;
 	size_t	rd = 0;
 	size_t	msg_bit_size = 0;
-	size_t	msg_size = 512;
+	size_t	msg_size = STACK_BUFFER_SIZE;
 	size_t	file_size = 0;
-	char	buffer[_sha256_file_chunk_size(512)] = { 0 };
+	char	buffer[_sha256_file_chunk_size(STACK_BUFFER_SIZE)] = { 0 };
 
 	fp = fopen(filepath, "r");
 
@@ -211,24 +213,72 @@ bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash)
 	return true;
 }
 
-bool sha256_hash_to_hexstr(struct sha256_hash* hash, char* str, size_t ssize, bool uppercase)
+struct sha256_format_t
+{
+	const char* type;
+	const char* fmt_str;
+	size_t		size;
+};
+
+static struct sha256_format_t sha256_fmt[] = {
+	//hex, fmt, mini size
+	{"hex", "%.2x%.2x%.2x%.2x", 65},
+	{"HEX", "%.2X%.2X%.2X%.2X", 65},
+	{"h:e:x", "%.2x:%.2x:%.2x:%.2x:", 96},
+	{"H:E:X", "%.2X:%.2X:%.2X:%.2X:", 96}
+};
+
+static const char* sha256_format_str(const char* fmt)
+{
+	for (size_t i = 0; i < sizeof(sha256_fmt) / sizeof(sha256_fmt[0]); ++ i)
+	{
+		if (strcmp(fmt, sha256_fmt[i].type) == 0)
+		{
+			return sha256_fmt[i].fmt_str;
+		}
+	}
+	//default hex
+	return sha256_fmt[0].fmt_str;
+}
+
+static bool sha256_check_str_buffer_size(const char* fmt, size_t s)
+{
+	for (size_t i = 0; i < sizeof(sha256_fmt) / sizeof(sha256_fmt[0]); ++ i)
+	{
+		if (strcmp(fmt, sha256_fmt[i].type) == 0)
+		{
+			return s >= sha256_fmt[i].size;
+		}
+	}
+
+	return s >= sha256_fmt[0].size;
+}
+
+bool sha256_hash_to_hexstr(struct sha256_hash* hash, char* str, size_t ssize, const char *fmt)
 {
 	int	wt = 0;
 
-	if (ssize < 65)
+	if (!sha256_check_str_buffer_size(fmt, ssize))
 	{
 		return false;
 	}
 
+	const char* new_fmt = sha256_format_str(fmt);
+
 	for (int i = 0; (i < 8) && (ssize - wt > 0); ++ i)
 	{
 		wt += snprintf(str + wt, ssize - wt, 
-			((uppercase == false) ? "%.2x%.2x%.2x%.2x" : "%.2X%.2X%.2X%.2X"), 
+			new_fmt, 
 			(hash->hash[i] & 0xff000000) >> 24,
 			(hash->hash[i] & 0x00ff0000) >> 16,
 			(hash->hash[i] & 0x0000ff00) >> 8,
 			(hash->hash[i] & 0x000000ff)
 		);
+	}
+	//erase last :
+	if (str[wt - 1] == ':')
+	{
+		str[wt - 1] = 0;
 	}
 
 	return true;

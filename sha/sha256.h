@@ -39,7 +39,7 @@ struct sha256_hash
 //	size	unit of byte
 bool sha256_checksum(void* buf, size_t size, struct sha256_hash* hash);
 bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash);
-bool sha256_hash_to_hexstr(struct sha256_hash* hash, char* str, size_t ssize, bool uppercase);
+bool sha256_hash_to_hexstr(struct sha256_hash* hash, char* str, size_t ssize, const char *fmt);
 
 #ifdef __cplusplus
 }
