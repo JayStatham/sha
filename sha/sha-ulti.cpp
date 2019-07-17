@@ -19,6 +19,7 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Date: 2019/7/14
  */
 #include "sha-ulti.h"
+#include "sha-byteorder.h"
 
 void print_memory_buffer(void* address, size_t wide, size_t size)
 {
@@ -31,12 +32,28 @@ std::ostream& operator << (std::ostream& out, struct sha256_hash & hash)
 {
 	char    buf[128] = { 0 };
 	bool flag = (out.flags() & std::ios::uppercase) > 0;
-	sha256_hash_to_hexstr(&hash, buf, 128, "hex");
+	sha256_hash_to_str(&hash, buf, 128, "hex");
 	out << buf;
 	return out;
 }
 // override << for sha256_hash*
 std::ostream& operator << (std::ostream& out, struct sha256_hash * hash)
+{
+	out << *hash;
+	return out;
+}
+
+// override << for sha384_hash
+std::ostream& operator << (std::ostream& out, struct sha384_hash & hash)
+{
+	char    buf[256] = { 0 };
+	bool flag = (out.flags() & std::ios::uppercase) > 0;
+	sha384_hash_to_str(&hash, buf, 256, "hex");
+	out << buf;
+	return out;
+}
+// override << for sha384_hash*
+std::ostream& operator << (std::ostream& out, struct sha384_hash * hash)
 {
 	out << *hash;
 	return out;

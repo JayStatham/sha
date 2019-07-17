@@ -26,25 +26,29 @@ Date: 2019/7/14
 extern "C" {
 #endif
 //types
-typedef	uint32_t	sha256_word;
-//SHA256 hash: Big-Endian
+typedef	uint64_t	sha384_word;
+typedef	sha384_word	sha512_word;
+//SHA384 hash: Big-Endian
 //digest = hash = h0 append h1 append h2 append h3 append h4 append h5 append h6 append h7
-struct sha256_hash
+struct sha384_hash
 {
-	sha256_word	hash[8];
+	bool 		is_sha384_or_sha512;//true is 384, false 512
+	sha384_word	hash[8];
 };
-// sha256_checksum
-// caculate SHA256 checksum
+
+#define	sha512_hash sha384_hash
+// sha384_checksum
+// caculate SHA384 checksum
 //   buf*	buffer in bytes
 //	size	unit of byte
-bool sha256_checksum(void* buf, size_t size, struct sha256_hash* hash);
-// sha256_file_checksum
-// caculate SHA256 checksum from files
+bool sha384_checksum(void* buf, size_t size, struct sha384_hash* hash);
+// sha384_file_checksum
+// caculate SHA512 checksum from files
 //   filepath  the path of file
-bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash);
-// sha256_hash_to_str
+bool sha384_file_checksum(const char* filepath, struct sha384_hash* hash);
+// sha384_hash_to_str
 //	convert sha256_hash to string format
-//		hash	the sha256_hash pointer
+//		hash	the sha384_hash pointer
 //		str		the string for output
 //		ssize	the size of string
 //		fmt		the formula of the string, ex:
@@ -54,7 +58,29 @@ bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash);
 //				HEX		AABBCCDDEEFF0011	(uppercase)
 //				H:E:X	AA:BB:CC:DD:EE:...
 //				H-E-X	AA-BB-CC-DD-EE:...
-bool sha256_hash_to_str(struct sha256_hash* hash, char* str, size_t ssize, const char *fmt);
+bool sha384_hash_to_str(struct sha384_hash* hash, char* str, size_t ssize, const char *fmt);
+// sha512_checksum
+// caculate SHA384 checksum
+//   buf*	buffer in bytes
+//	size	unit of byte
+bool sha512_checksum(void* buf, size_t size, struct sha512_hash* hash);
+// sha512_file_checksum
+// caculate SHA512 checksum from files
+//   filepath  the path of file
+bool sha512_file_checksum(const char* filepath, struct sha512_hash* hash);
+// sha512_hash_to_str
+//	convert sha512_hash to string format
+//		hash	the sha512_hash pointer
+//		str		the string for output
+//		ssize	the size of string
+//		fmt		the formula of the string, ex:
+//				hex		aabbccddeeff0011	(lowercase)
+//				h:e:x	aa:bb:cc:dd:...
+//				h-e-x	aa-bb-cc-dd:...
+//				HEX		AABBCCDDEEFF0011	(uppercase)
+//				H:E:X	AA:BB:CC:DD:EE:...
+//				H-E-X	AA-BB-CC-DD-EE:...
+bool sha512_hash_to_str(struct sha512_hash* hash, char* str, size_t ssize, const char *fmt);
 
 #ifdef __cplusplus
 }

@@ -9,13 +9,13 @@
 #include <arpa/inet.h>
 #endif
 
-TEST(SHA256, bufferFT)
+TEST(SHA256, buffer)
 {
     struct sha256_hash  hash;
     char    str[128] = {0};
 
     sha256_checksum("abc", 3, &hash);
-    sha256_hash_to_hexstr(&hash, str, 128, "hex");
+    sha256_hash_to_str(&hash, str, 128, "hex");
     ASSERT_STREQ("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", str);
 	std::cout << hash << std::endl;
 }
@@ -32,7 +32,7 @@ TEST(SHA256, file)
 	}
 
 	sha256_file_checksum("abc.txt", &hash);
-	sha256_hash_to_hexstr(&hash, str, 128, "hex");
+	sha256_hash_to_str(&hash, str, 128, "hex");
 	ASSERT_STREQ("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", str);
 	std::cout << hash << std::endl;
 }
@@ -65,7 +65,7 @@ TEST(SHA256, big_buffer)
     }
 
 	sha256_checksum(pbuf, rd, &hash);
-	sha256_hash_to_hexstr(&hash, str, 128, "h:e:x");
+	sha256_hash_to_str(&hash, str, 128, "h:e:x");
 	ASSERT_STREQ("5c:d4:f6:7c:99:09:e8:71:8f:24:a3:ba:a5:2e:5b:3c:ee:88:f2:9b:a4:aa:85:ac:94:aa:7c:88:39:64:69:5d", str);
 	std::cout << hash << std::endl;
     free(pbuf);
@@ -88,7 +88,7 @@ TEST(SHA256, file2)
 	}
 
 	sha256_file_checksum("hij.txt", &hash);
-	sha256_hash_to_hexstr(&hash, str, 128, "HEX");
+	sha256_hash_to_str(&hash, str, 128, "HEX");
 	ASSERT_STREQ("5CD4F67C9909E8718F24A3BAA52E5B3CEE88F29BA4AA85AC94AA7C883964695D", str);
 	std::cout << hash << std::endl;
 }
@@ -115,4 +115,83 @@ TEST(BIT, rotate)
     ASSERT_EQ(0x2, _sha_left_rotate32(1, 1));
     ASSERT_EQ(0x80000000, _sha_left_rotate32(1, 31));
     ASSERT_EQ(0x28, _sha_left_rotate32(5, 3));
+	ASSERT_EQ(0x0010, _sha_left_rotate64(1, 4));
+	ASSERT_EQ(0x0010, _sha_right_rotate64(0x100, 4));
 }
+
+TEST(SHA384, buffer)
+{
+    struct sha384_hash  hash;
+    char    str[128] = {0};
+
+    sha384_checksum("abc", 3, &hash);
+    sha384_hash_to_str(&hash, str, 128, "hex");
+    ASSERT_STREQ("cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7", str);
+	std::cout << hash << std::endl;
+}
+
+TEST(SHA512, buffer)
+{
+    struct sha512_hash  hash;
+    char    str[256] = {0};
+
+    sha512_checksum("abc", 3, &hash);
+    sha512_hash_to_str(&hash, str, 256, "hex");
+    ASSERT_STREQ("ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f", str);
+	std::cout << hash << std::endl;
+}
+
+TEST(SHA384, file)
+{
+	struct sha384_hash  hash;
+	char    str[256] = { 0 };
+	//create file
+	{
+		FILE *fp = fopen("384.txt", "w");
+
+        for (size_t i = 0; i < 1024; ++ i)
+		{
+            fprintf(fp, "%d", i);
+        }
+
+		fclose(fp);
+	}
+
+	sha384_file_checksum("384.txt", &hash);
+	sha384_hash_to_str(&hash, str, 256, "HEX");
+	ASSERT_STREQ("01D9A057D03597D261EB3C31C300A5E07A66B2702EEBE2018F92C4B44858D9F360E87430F3DB884CB9DB37F9154D9AF4", str);
+	std::cout << hash << std::endl;
+}
+
+TEST(SHA512, file)
+{
+	struct sha512_hash  hash;
+	char    str[256] = { 0 };
+	//create file
+	{
+		FILE *fp = fopen("512.txt", "w");
+
+        for (size_t i = 0; i < 1024; ++ i)
+		{
+            fprintf(fp, "%d", i);
+        }
+
+		fclose(fp);
+	}
+
+	sha512_file_checksum("512.txt", &hash);
+	sha512_hash_to_str(&hash, str, 256, "h:e:x");
+	ASSERT_STREQ("93:f2:77:4a:79:29:f2:cd:fd:e6:79:c2:e1:21:e9:2b:29:9c:32:1c:3d:a4:f2:c9:b2:25:37:80:8d:58:ba:84:06:55:dd:4c:94:c9:bb:8b:ca:da:d6:ad:c1:ed:5c:d6:46:a2:e2:65:e3:dc:3f:28:44:4a:4d:7e:a5:78:7d:a8", str);
+	std::cout << hash << std::endl;
+}
+
+// TEST(SHA512, file2)
+// {
+// 	struct sha512_hash  hash;
+// 	char    str[256] = { 0 };
+
+// 	sha512_file_checksum("b512.pdb", &hash);
+// 	sha512_hash_to_str(&hash, str, 256, "HEX");
+// 	ASSERT_STREQ("B4FDB25899B004F7586A498BFCE2F7138F21DEBBED27BAC52CFAB1827BBE5104D8A6BE59BBDDCD3B2C04F9D3FCC1A870614D55A515D88CAEF4D53B617F4A65A7", str);
+// 	std::cout << hash << std::endl;
+// }

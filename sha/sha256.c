@@ -20,6 +20,7 @@ Date: 2019/7/14
  */
 #include "sha256.h"
 #include "sha-byteorder.h"
+#include "sha-ulti.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -213,19 +214,14 @@ bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash)
 	return true;
 }
 
-struct sha256_format_t
-{
-	const char* type;
-	const char* fmt_str;
-	size_t		size;
-};
-
-static struct sha256_format_t sha256_fmt[] = {
+static struct sha_format_t sha256_fmt[] = {
 	//hex, fmt, mini size
 	{"hex", "%.2x%.2x%.2x%.2x", 65},
 	{"HEX", "%.2X%.2X%.2X%.2X", 65},
 	{"h:e:x", "%.2x:%.2x:%.2x:%.2x:", 96},
-	{"H:E:X", "%.2X:%.2X:%.2X:%.2X:", 96}
+	{"H:E:X", "%.2X:%.2X:%.2X:%.2X:", 96},
+	{"h-e-x", "%.2x-%.2x-%.2x-%.2x-", 96},
+	{"H-E-X", "%.2X-%.2X-%.2X-%.2X-", 96}
 };
 
 static const char* sha256_format_str(const char* fmt)
@@ -254,7 +250,7 @@ static bool sha256_check_str_buffer_size(const char* fmt, size_t s)
 	return s >= sha256_fmt[0].size;
 }
 
-bool sha256_hash_to_hexstr(struct sha256_hash* hash, char* str, size_t ssize, const char *fmt)
+bool sha256_hash_to_str(struct sha256_hash* hash, char* str, size_t ssize, const char *fmt)
 {
 	int	wt = 0;
 
@@ -275,8 +271,8 @@ bool sha256_hash_to_hexstr(struct sha256_hash* hash, char* str, size_t ssize, co
 			(hash->hash[i] & 0x000000ff)
 		);
 	}
-	//erase last :
-	if (str[wt - 1] == ':')
+	//erase last : or -
+	if (str[wt - 1] == ':' || str[wt - 1] == '-')
 	{
 		str[wt - 1] = 0;
 	}

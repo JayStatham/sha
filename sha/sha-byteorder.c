@@ -18,6 +18,33 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Date: 2019/7/14
  */
-#pragma once
-#include "sha256.h"
-#include "sha384-512.h"
+#include "sha-byteorder.h"
+
+uint128_t swap128(uint128_t x)
+{
+	uint128_t y = {0};
+	y.u8[0] = x.u8[15];
+	y.u8[1] = x.u8[14];
+	y.u8[2] = x.u8[13];
+	y.u8[3] = x.u8[12];
+	y.u8[4] = x.u8[11];
+	y.u8[5] = x.u8[10];
+	y.u8[6] = x.u8[9];
+	y.u8[7] = x.u8[8];
+	y.u8[8] = x.u8[7];
+	y.u8[9] = x.u8[6];
+	y.u8[10] = x.u8[5];
+	y.u8[11] = x.u8[4];
+	y.u8[12] = x.u8[3];
+	y.u8[13] = x.u8[2];
+	y.u8[14] = x.u8[1];
+	y.u8[15] = x.u8[0];
+	return y;
+}
+
+uint128_t mult128(uint64_t x, uint64_t y)
+{
+	uint128_t z = {0};
+	z.u64[0] = x * y;
+	return z;
+}

@@ -28,6 +28,7 @@ Date: 2019/7/14
 						(((unsigned int)(x) & 0x000000ff) << 24))
 #define	_sha_swap64(x)	(((uint64_t)_sha_swap32((uint64_t)(x) & 0xffffffff) << 32) | \
 						_sha_swap32(((uint64_t)(x) >> 32) & 0xffffffff))
+#define	_sha_swap128(x)	(swap128(x))
 // byteorder by arch.
 #if _MSC_VER
 //host is LE
@@ -37,6 +38,8 @@ Date: 2019/7/14
 #define	_sha_le32(x)	(x)
 #define	_sha_be64(x)	_sha_swap64(x)
 #define	_sha_le64(x)	(x)
+#define	_sha_be128(x)	_sha_swap128(x)
+#define	_sha_le128(x)	(x)
 #elif defined(__GNUC__)
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 //host is LE
@@ -46,6 +49,8 @@ Date: 2019/7/14
 #define	_sha_le32(x)	(x)
 #define	_sha_be64(x)	_sha_swap64(x)
 #define	_sha_le64(x)	(x)
+#define	_sha_be128(x)	_sha_swap128(x)
+#define	_sha_le128(x)	(x)
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 //host is BE
 #define	_sha_be16(x)	(x)
@@ -54,6 +59,8 @@ Date: 2019/7/14
 #define	_sha_le32(x)	_sha_swap32(x)
 #define	_sha_be64(x)	(x)
 #define	_sha_le64(x)	_sha_swap64(x)
+#define	_sha_be128(x)	(x)
+#define	_sha_le128(x)	_sha_swap128(x)
 #else
 //error endian
 #endif
@@ -63,3 +70,25 @@ Date: 2019/7/14
 									((uint32_t)(x) << (n)))
 #define	_sha_right_rotate32(x, n)	(((uint32_t)(x) << (32 - (n))) | \
 									(uint32_t)(x) >> (n))
+#define	_sha_left_rotate64(x, n)	(((uint64_t)(x) >> (64 - (n))) | \
+									((uint64_t)(x) << (n)))
+#define	_sha_right_rotate64(x, n)	(((uint64_t)(x) << (64 - (n))) | \
+									(uint64_t)(x) >> (n))
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    //type big int
+    typedef struct _uint128_t {
+		union
+		{
+			uint8_t		u8[16];
+			uint64_t	u64[2];
+		};
+    }uint128_t;
+
+	uint128_t swap128(uint128_t);
+	uint128_t mult128(uint64_t, uint64_t);
+#ifdef __cplusplus
+}
+#endif

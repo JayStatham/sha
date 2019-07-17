@@ -37,13 +37,22 @@ struct memory_block
 std::ostream& operator << (std::ostream& out, struct sha256_hash & hash);
 // override << for sha256_hash*
 std::ostream& operator << (std::ostream& out, struct sha256_hash * hash);
+// override << for sha384_hash
+std::ostream& operator << (std::ostream& out, struct sha384_hash & hash);
+// override << for sha384_hash*
+std::ostream& operator << (std::ostream& out, struct sha384_hash * hash);
 std::ostream& operator << (std::ostream& out, struct memory_block & mb);
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    struct sha_format_t
+    {
+        const char* type;
+        const char* fmt_str;
+        size_t		size;
+    };
 	void print_memory_buffer(void* address, size_t wide, size_t size);
 #ifdef __cplusplus
 }
