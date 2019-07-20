@@ -48,7 +48,16 @@ std::ostream& operator << (std::ostream& out, struct sha384_hash & hash)
 {
 	char    buf[256] = { 0 };
 	bool flag = (out.flags() & std::ios::uppercase) > 0;
-	sha384_hash_to_str(&hash, buf, 256, "hex");
+
+	if (hash.is_sha384_or_sha512)
+	{
+		sha384_hash_to_str(&hash, buf, 256, "hex");
+	}
+	else 
+	{
+		sha512_hash_to_str(&hash, buf, 256, "hex");
+	}
+
 	out << buf;
 	return out;
 }
@@ -58,7 +67,13 @@ std::ostream& operator << (std::ostream& out, struct sha384_hash * hash)
 	out << *hash;
 	return out;
 }
-
+// print memory_block with beautifull format
+// like this:
+//  memory address:0x123456, wide:4, size: 32 
+//  address    content          string
+//  __________________________________________________
+//  0x123456 00000000 00000000 ...........
+//  0x123458 00000000 00000000 ...........
 std::ostream& operator << (std::ostream& out, struct memory_block & mb)
 {
 	auto f = out.flags();

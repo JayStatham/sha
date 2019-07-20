@@ -142,7 +142,7 @@ static void process_chunk(struct sha384_hash *sh, void* chunk)
 static bool _sha384_512_checksum(void* buf, size_t size, struct sha384_hash* hash)
 {
 	char	*pbuf = (char*)buf;
-	uint128_t	msg_bit_size = mult128(size, 8);
+	uint128_t	msg_bit_size = bit_shift_left64(size, 3);
 	size_t	size_tobe_readed = size;
 	size_t	msg_size = STACK_BUFFER_SIZE;
 	char	buffer[_sha384_file_chunk_size(STACK_BUFFER_SIZE)] = {0};
@@ -156,7 +156,7 @@ static bool _sha384_512_checksum(void* buf, size_t size, struct sha384_hash* has
 		init_sha512_hash(hash);
 	}
 	
-	while (size_tobe_readed > 0)
+	while (true)
 	{
 		//slice the input buffer to 512B's msg
 		size_t rd = size_tobe_readed > msg_size ? msg_size : size_tobe_readed;
@@ -178,6 +178,11 @@ static bool _sha384_512_checksum(void* buf, size_t size, struct sha384_hash* has
 		for (size_t s = 0; s < msg_size; s += CHUNK_SIZE)
 		{
 			process_chunk(hash, &buffer[s]);
+		}
+
+		if (rd < msg_size)
+		{
+			break;
 		}
 	}
 	
@@ -201,11 +206,11 @@ static bool _sha384_512_file_checksum(const char* filepath, struct sha384_hash* 
 	FILE	*fp = NULL;
 	size_t	rd = 0;
 	uint128_t	msg_bit_size = {0};
-	size_t	msg_size = STACK_BUFFER_SIZE;
-	size_t	file_size = 0;
+	size_t		msg_size = STACK_BUFFER_SIZE;
+	uint64_t	file_size = 0;
 	char	buffer[_sha384_file_chunk_size(STACK_BUFFER_SIZE)] = { 0 };
 
-	fp = fopen(filepath, "r");
+	fp = fopen(filepath, "rb");
 
 	if (fp == NULL)
 	{
@@ -224,12 +229,6 @@ static bool _sha384_512_file_checksum(const char* filepath, struct sha384_hash* 
 	while (true)
 	{
 		rd = fread(buffer, 1, msg_size, fp);
-
-		if (rd < 1)
-		{
-			break;
-		}
-
 		file_size += rd;
 
 		if (rd < msg_size)
@@ -237,7 +236,7 @@ static bool _sha384_512_file_checksum(const char* filepath, struct sha384_hash* 
 			// filling 1bits, 0s...
 			buffer[rd] = 0x80;
 			memset(&buffer[1 + rd], 0, _sha384_filling_size(rd) - 1);
-			msg_bit_size = mult128(file_size, 8);
+			msg_bit_size = bit_shift_left64(file_size, 3);
 			*((uint128_t*)(buffer + _sha384_filling_size(rd) + rd)) = 
 				_sha384_msg_size_be(msg_bit_size);
 			//corrected last msg size
@@ -247,6 +246,11 @@ static bool _sha384_512_file_checksum(const char* filepath, struct sha384_hash* 
 		for (size_t s = 0; s < msg_size; s += CHUNK_SIZE)
 		{
 			process_chunk(hash, &buffer[s]);
+		}
+
+		if (rd < msg_size)
+		{
+			break;
 		}
 	}
 

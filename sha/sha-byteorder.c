@@ -42,9 +42,26 @@ uint128_t swap128(uint128_t x)
 	return y;
 }
 
-uint128_t mult128(uint64_t x, uint64_t y)
+uint128_t bit_shift_left64(uint64_t x, size_t bits)
 {
 	uint128_t z = {0};
-	z.u64[0] = x * y;
+	uint64_t s = _sha_left_rotate64(x, bits);
+	uint64_t m = 0;
+
+	for (size_t i = 0; i < bits; ++ i)
+	{
+		m |= 1 << i;
+	}
+
+	s &= m;
+#if _SHA_BYTE_ODER_LE
+	z.u64[0] = x << bits;
+	z.u64[1] <<= bits;
+	z.u64[1] |= s;
+#else
+	z.u64[1] = x << bits;
+	z.u64[0] <<= bits;
+	z.u64[0] |= s;
+#endif
 	return z;
 }

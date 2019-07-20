@@ -18,6 +18,8 @@ OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Date: 2019/7/14
  */
+/* portal header */
 #pragma once
 #include "sha256.h"
 #include "sha384-512.h"
+#include "sha-ulti.h"

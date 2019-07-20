@@ -185,13 +185,37 @@ TEST(SHA512, file)
 	std::cout << hash << std::endl;
 }
 
-// TEST(SHA512, file2)
-// {
-// 	struct sha512_hash  hash;
-// 	char    str[256] = { 0 };
+TEST(SHA512, file2)
+{
+	struct sha512_hash  hash;
+	char    str[256] = { 0 };
 
-// 	sha512_file_checksum("b512.pdb", &hash);
-// 	sha512_hash_to_str(&hash, str, 256, "HEX");
-// 	ASSERT_STREQ("B4FDB25899B004F7586A498BFCE2F7138F21DEBBED27BAC52CFAB1827BBE5104D8A6BE59BBDDCD3B2C04F9D3FCC1A870614D55A515D88CAEF4D53B617F4A65A7", str);
-// 	std::cout << hash << std::endl;
-// }
+	sha512_file_checksum("b512.pdb", &hash);
+	sha512_hash_to_str(&hash, str, 256, "HEX");
+	ASSERT_STREQ("B4FDB25899B004F7586A498BFCE2F7138F21DEBBED27BAC52CFAB1827BBE5104D8A6BE59BBDDCD3B2C04F9D3FCC1A870614D55A515D88CAEF4D53B617F4A65A7", str);
+	std::cout << memory_block(&str[0], 1, sizeof(str));
+	std::cout << hash << std::endl;
+}
+
+TEST(UINT128, left_shift)
+{
+	uint128_t	z = {0};
+	
+#if _SHA_BYTE_ODER_LE
+	//small numbers
+	z = bit_shift_left64(1, 8);
+	ASSERT_EQ(z.u64[0], 256);
+	//edge
+	z = bit_shift_left64(0x8000000000000001, 1);
+	ASSERT_EQ(z.u64[0], 2);
+	ASSERT_EQ(z.u64[1], 1);
+#else 
+	//small numbers
+	z = bit_shift_left64(1, 8);
+	ASSERT_EQ(z.u64[1], 256);
+	//edge
+	z = bit_shift_left64(0x8000000000000001, 1);
+	ASSERT_EQ(z.u64[1], 2);
+	ASSERT_EQ(z.u64[0], 1);
+#endif
+}

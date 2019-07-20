@@ -133,7 +133,7 @@ bool sha256_checksum(void* buf, size_t size, struct sha256_hash* hash)
 
 	init_sha256_hash(hash);
 	
-	while (size_tobe_readed > 0)
+	while (true)
 	{
 		//slice the input buffer to 512B's msg
 		size_t rd = size_tobe_readed > msg_size ? msg_size : size_tobe_readed;
@@ -157,6 +157,11 @@ bool sha256_checksum(void* buf, size_t size, struct sha256_hash* hash)
 		{
 			process_chunk(hash, &buffer[s]);
 		}
+
+		if (rd < msg_size)
+		{
+			break;
+		}
 	}
 	
 	return true;
@@ -171,7 +176,7 @@ bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash)
 	size_t	file_size = 0;
 	char	buffer[_sha256_file_chunk_size(STACK_BUFFER_SIZE)] = { 0 };
 
-	fp = fopen(filepath, "r");
+	fp = fopen(filepath, "rb");
 
 	if (fp == NULL)
 	{
@@ -183,12 +188,6 @@ bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash)
 	while (true)
 	{
 		rd = fread(buffer, 1, msg_size, fp);
-
-		if (rd < 1)
-		{
-			break;
-		}
-
 		file_size += rd;
 
 		if (rd < msg_size)
@@ -207,6 +206,11 @@ bool sha256_file_checksum(const char* filepath, struct sha256_hash* hash)
 		for (size_t s = 0; s < msg_size; s += CHUNK_SIZE)
 		{
 			process_chunk(hash, &buffer[s]);
+		}
+
+		if (rd < msg_size)
+		{
+			break;
 		}
 	}
 

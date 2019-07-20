@@ -29,9 +29,11 @@ Date: 2019/7/14
 #define	_sha_swap64(x)	(((uint64_t)_sha_swap32((uint64_t)(x) & 0xffffffff) << 32) | \
 						_sha_swap32(((uint64_t)(x) >> 32) & 0xffffffff))
 #define	_sha_swap128(x)	(swap128(x))
-// byteorder by arch.
+// byteorder by arch. Decide dynamic is better!
 #if _MSC_VER
 //host is LE
+#define	_SHA_BYTE_ODER_LE	(1)
+#define	_SHA_BYTE_ODER_BE	(0)
 #define	_sha_be16(x)	_sha_swap16(x)
 #define	_sha_le16(x)	(x)
 #define	_sha_be32(x)	_sha_swap32(x)
@@ -43,6 +45,8 @@ Date: 2019/7/14
 #elif defined(__GNUC__)
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 //host is LE
+#define	_SHA_BYTE_ODER_LE	(1)
+#define	_SHA_BYTE_ODER_BE	(0)
 #define	_sha_be16(x)	_sha_swap16(x)
 #define	_sha_le16(x)	(x)
 #define	_sha_be32(x)	_sha_swap32(x)
@@ -53,6 +57,8 @@ Date: 2019/7/14
 #define	_sha_le128(x)	(x)
 #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 //host is BE
+#define	_SHA_BYTE_ODER_LE	(0)
+#define	_SHA_BYTE_ODER_BE	(1)
 #define	_sha_be16(x)	(x)
 #define	_sha_le16(x)	_sha_swap16(x)
 #define	_sha_be32(x)	(x)
@@ -88,7 +94,7 @@ extern "C" {
     }uint128_t;
 
 	uint128_t swap128(uint128_t);
-	uint128_t mult128(uint64_t, uint64_t);
+	uint128_t bit_shift_left64(uint64_t, size_t);
 #ifdef __cplusplus
 }
 #endif
