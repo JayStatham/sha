@@ -20,6 +20,7 @@ Date: 2019/7/14
  */
 #pragma once
 #include <stdint.h>
+#include <stddef.h>
 // swap memory byteorder
 #define	_sha_swap16(x)	((((unsigned short)(x) & 0xff00) >> 8) | (((unsigned short)(x) & 0x00ff) << 8))
 #define	_sha_swap32(x)	((((unsigned int)(x) & 0xff000000) >> 24) | \

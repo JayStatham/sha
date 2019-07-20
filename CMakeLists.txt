@@ -95,10 +95,11 @@ IF (MSVC)
 		"ole32.lib"
         )
 ELSE ()	
-    SET(CMAKE_C_FLAGS "-D_GNU_SOURCE -Wall -Wextra ${CMAKE_C_FLAGS}")
+	SET(CMAKE_C_FLAGS "-D_GNU_SOURCE -Wall -Wextra ${CMAKE_C_FLAGS}")
+	SET(CMAKE_CXX_FLAGS "-std=c++11 -fpermissive")
 
     IF (CMAKE_SYSTEM_NAME MATCHES "(Solaris|SunOS)")
-        SET(CMAKE_C_FLAGS "-std=c++11 -D_POSIX_C_SOURCE=200112L -D__EXTENSIONS__ -D_POSIX_PTHREAD_SEMANTICS ${CMAKE_C_FLAGS}")
+        SET(CMAKE_C_FLAGS "-D_POSIX_C_SOURCE=200112L -D__EXTENSIONS__ -D_POSIX_PTHREAD_SEMANTICS ${CMAKE_C_FLAGS}")
     ENDIF()
     target_link_libraries(sha m pthread)
 ENDIF()

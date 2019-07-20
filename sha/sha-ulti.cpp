@@ -74,7 +74,7 @@ std::ostream& operator << (std::ostream& out, struct sha384_hash * hash)
 //  __________________________________________________
 //  0x123456 00000000 00000000 ...........
 //  0x123458 00000000 00000000 ...........
-std::ostream& operator << (std::ostream& out, struct memory_block & mb)
+std::ostream& operator << (std::ostream& out, struct memory_block mb)
 {
 	auto f = out.flags();
 

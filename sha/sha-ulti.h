@@ -41,7 +41,7 @@ std::ostream& operator << (std::ostream& out, struct sha256_hash * hash);
 std::ostream& operator << (std::ostream& out, struct sha384_hash & hash);
 // override << for sha384_hash*
 std::ostream& operator << (std::ostream& out, struct sha384_hash * hash);
-std::ostream& operator << (std::ostream& out, struct memory_block & mb);
+std::ostream& operator << (std::ostream& out, struct memory_block mb);
 #endif
 
 #ifdef __cplusplus

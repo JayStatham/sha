@@ -1,3 +1,21 @@
+/***********************************************************************************
+The MIT License (MIT)
+Copyright (c) 2018 JStatham
+Permission is hereby granted, free of charge, to any person obtaining a copy of 
+this software and associated documentation files (the "Software"), to deal in 
+the Software without restriction, including without limitation the rights to use, 
+copy, modify, merge, publish, distribute, sub license, and/or sell copies of the 
+Software, and to permit persons to whom the Software is furnished to do so, subject 
+to the following conditions:
+The above copyright notice and this permission notice shall be included in all 
+copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,FITNESS FOR A PARTICULAR 
+PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+TORT OR OTHERWISE, ARISING FROM,OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR 
+OTHER DEALINGS IN THE SOFTWARE.
+**************************************************************************************/
 #include "gtest.h"
 #include "sha256.h"
 #include "sha-byteorder.h"
@@ -14,7 +32,7 @@ TEST(SHA256, buffer)
     struct sha256_hash  hash;
     char    str[128] = {0};
 
-    sha256_checksum("abc", 3, &hash);
+    sha256_checksum((void*)"abc", 3, &hash);
     sha256_hash_to_str(&hash, str, 128, "hex");
     ASSERT_STREQ("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", str);
 	std::cout << hash << std::endl;
@@ -45,7 +63,7 @@ TEST(SHA256, big_buffer)
 	{
 		FILE *fp = fopen("efg.txt", "w");
 
-        for (size_t i = 0; i < 1024; ++ i)
+        for (int i = 0; i < 1024; ++ i)
 		{
             fprintf(fp, "%d", i);
         }
@@ -64,7 +82,7 @@ TEST(SHA256, big_buffer)
 		fclose(fp);
     }
 
-	sha256_checksum(pbuf, rd, &hash);
+	sha256_checksum((void*)pbuf, rd, &hash);
 	sha256_hash_to_str(&hash, str, 128, "h:e:x");
 	ASSERT_STREQ("5c:d4:f6:7c:99:09:e8:71:8f:24:a3:ba:a5:2e:5b:3c:ee:88:f2:9b:a4:aa:85:ac:94:aa:7c:88:39:64:69:5d", str);
 	std::cout << hash << std::endl;
@@ -79,7 +97,7 @@ TEST(SHA256, file2)
 	{
 		FILE *fp = fopen("hij.txt", "w");
 
-        for (size_t i = 0; i < 1024; ++ i)
+        for (int i = 0; i < 1024; ++ i)
 		{
             fprintf(fp, "%d", i);
         }
@@ -124,7 +142,7 @@ TEST(SHA384, buffer)
     struct sha384_hash  hash;
     char    str[128] = {0};
 
-    sha384_checksum("abc", 3, &hash);
+    sha384_checksum((void*)"abc", 3, &hash);
     sha384_hash_to_str(&hash, str, 128, "hex");
     ASSERT_STREQ("cb00753f45a35e8bb5a03d699ac65007272c32ab0eded1631a8b605a43ff5bed8086072ba1e7cc2358baeca134c825a7", str);
 	std::cout << hash << std::endl;
@@ -135,7 +153,7 @@ TEST(SHA512, buffer)
     struct sha512_hash  hash;
     char    str[256] = {0};
 
-    sha512_checksum("abc", 3, &hash);
+    sha512_checksum((void*)"abc", 3, &hash);
     sha512_hash_to_str(&hash, str, 256, "hex");
     ASSERT_STREQ("ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f", str);
 	std::cout << hash << std::endl;
@@ -149,7 +167,7 @@ TEST(SHA384, file)
 	{
 		FILE *fp = fopen("384.txt", "w");
 
-        for (size_t i = 0; i < 1024; ++ i)
+        for (int i = 0; i < 1024; ++ i)
 		{
             fprintf(fp, "%d", i);
         }
@@ -171,7 +189,7 @@ TEST(SHA512, file)
 	{
 		FILE *fp = fopen("512.txt", "w");
 
-        for (size_t i = 0; i < 1024; ++ i)
+        for (int i = 0; i < 1024; ++ i)
 		{
             fprintf(fp, "%d", i);
         }
@@ -185,6 +203,7 @@ TEST(SHA512, file)
 	std::cout << hash << std::endl;
 }
 
+#if 0
 TEST(SHA512, file2)
 {
 	struct sha512_hash  hash;
@@ -196,6 +215,7 @@ TEST(SHA512, file2)
 	std::cout << memory_block(&str[0], 1, sizeof(str));
 	std::cout << hash << std::endl;
 }
+#endif
 
 TEST(UINT128, left_shift)
 {
